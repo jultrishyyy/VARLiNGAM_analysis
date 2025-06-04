@@ -1,0 +1,52 @@
+--- METRICS AND THRESHOLDS ---
+
+Best Lags: 2
+Best Threshold (from F1-Max): 0.0079
+Best Threshold (from Accuracy-Max): 1.5295
+
+--- FINAL SCORES (after pruning with F1-Max threshold) ---
+
+Final F1 Score after pruning: 0.2759
+Final Accuracy after pruning: 0.8594
+Final AUROC after pruning: 0.5717
+--- EDGE ANALYSIS ---
+
+Number of edges in ground truth (labels): 9.0
+Number of correctly predicted edges (True Positives): 8
+Number of correct non-edges (True Negatives): 14
+Number of incorrectly predicted edges (False Positives): 41
+Number of correct edges not predicted (False Negatives): 1
+
+--- ORDER ANALYSIS---
+
+Predicted Causal Order: [7, 1, 2, 0, 3, 4, 5, 6]
+True Causal Order: [0, 1, 5, 6, 7, 3, 4, 2]
+Number of wrongly ordered cause-effect pairs: 5
+
+==================================================
+
+--- SUMMARY MATRIX ---
+(Represents the max causal effect across all lags after pruning)
+
+[[1 1 1 1 1 1 1 1]
+ [1 1 0 0 0 0 0 1]
+ [0 1 1 0 1 0 0 1]
+ [1 1 1 1 1 1 1 1]
+ [1 1 1 1 1 1 1 1]
+ [1 1 1 1 1 1 1 1]
+ [1 1 1 1 1 1 1 1]
+ [0 1 0 0 0 0 0 1]]
+
+==================================================
+
+--- EFFECT SUMMARY MATRIX ---
+(Represents the max causal effect across all lags before pruning)
+
+0.521328,0.896073,0.224536,0.100078,0.014124,0.034967,0.299324,1.417573
+0.010975,0.862861,0.006345,0.003532,0.000543,0.002818,0.000313,0.103790
+0.000770,0.057488,0.896184,0.002387,0.007913,0.005983,0.005938,0.015575
+0.066270,0.367827,0.029038,0.737900,0.225772,0.222698,0.078261,0.787651
+0.152918,0.281707,0.309392,0.045258,0.828254,0.493262,0.127617,1.555245
+0.658622,0.420947,1.181487,0.063071,0.040245,0.771185,0.057437,6.648936
+0.534261,0.303643,0.313345,0.047474,0.040198,0.092608,0.536368,1.518986
+0.002223,0.016569,0.007393,0.000274,0.000332,0.001264,0.001230,0.638279

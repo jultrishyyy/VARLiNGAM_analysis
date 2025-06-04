@@ -1,0 +1,35 @@
+--- METRICS AND THRESHOLDS ---
+
+Best Lags: 1
+Best Threshold (from F1-Max): 0.0742
+Best Threshold (from Accuracy-Max): 0.0459
+
+--- FINAL SCORES (after pruning with F1-Max threshold) ---
+
+Final F1 Score after pruning: 0.8889
+Final Accuracy after pruning: 0.9200
+Final AUROC after pruning: 0.9000
+--- EDGE ANALYSIS ---
+
+Number of edges in ground truth (labels): 10
+Number of correctly predicted edges (True Positives): 8
+Number of correct non-edges (True Negatives): 15
+Number of incorrectly predicted edges (False Positives): 0
+Number of correct edges not predicted (False Negatives): 2
+
+--- ORDER ANALYSIS---
+
+Predicted Causal Order: [1, 0, 2, 4, 3]
+True Causal Order: [0, 4, 2, 3, 1]
+Number of wrongly ordered cause-effect pairs: 5
+
+==================================================
+
+--- CONTINUOUS SUMMARY MATRIX ---
+(Represents the max causal effect across all lags before pruning)
+
+0.367264,0.000928,0.006672,0.007605,0.008831
+0.015637,0.009325,0.017237,0.013761,0.044472
+0.019523,0.003334,0.006559,0.005115,0.158821
+0.090380,0.003549,0.011202,0.375982,0.130412
+0.127163,0.158102,0.003463,0.074170,0.012134

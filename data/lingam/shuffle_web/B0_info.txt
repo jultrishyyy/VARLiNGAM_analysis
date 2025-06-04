@@ -1,0 +1,56 @@
+--- METRICS AND THRESHOLDS ---
+
+Best Lags: 3
+Best Threshold (from F1-Max): 0.1290
+Best Threshold (from Accuracy-Max): 12.3802
+
+--- FINAL SCORES (after pruning with F1-Max threshold) ---
+
+Final F1 Score after pruning: 0.3243
+Final Accuracy after pruning: 0.8600
+Final AUROC after pruning: 0.6154
+--- EDGE ANALYSIS ---
+
+Number of edges in ground truth (labels): 14.0
+Number of correctly predicted edges (True Positives): 6
+Number of correct non-edges (True Negatives): 69
+Number of incorrectly predicted edges (False Positives): 17
+Number of correct edges not predicted (False Negatives): 8
+
+--- ORDER ANALYSIS---
+
+Predicted Causal Order: [1, 4, 7, 2, 3, 0, 8, 6, 5, 9]
+True Causal Order: [3, 4, 8, 0, 2, 5, 6, 7, 9, 1]
+Number of wrongly ordered cause-effect pairs: 5
+
+==================================================
+
+--- SUMMARY MATRIX ---
+(Represents the max causal effect across all lags after pruning)
+
+[[0 0 0 1 0 0 0 1 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 1 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 0]
+ [0 1 0 0 0 0 0 0 0 0]
+ [1 1 0 0 1 0 1 1 1 0]
+ [1 0 0 1 0 0 0 1 1 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 1 0 0 0 0 0 0]
+ [1 0 0 1 1 0 1 1 1 0]]
+
+==================================================
+
+--- EFFECT SUMMARY MATRIX ---
+(Represents the max causal effect across all lags before pruning)
+
+0.000000,0.000000,0.000822,12.076816,0.000000,0.000000,0.000000,1.566591,0.000000,0.000000
+0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+0.000000,0.000000,0.000000,0.000000,82.534437,0.000000,0.000000,0.000000,0.000000,0.000000
+0.000000,0.035508,0.000100,0.000000,0.000000,0.000000,0.000000,0.380901,0.000000,0.000000
+0.000000,1.053663,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+0.360373,0.274979,0.000000,0.000000,0.239392,0.000000,0.979382,1.278083,0.530757,0.000000
+0.166919,0.000000,0.000000,2.774370,0.000000,0.000000,0.000000,0.879394,0.564619,0.000000
+0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+0.196827,0.000000,0.000000,5.472043,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+0.385563,0.000000,0.000000,77.168192,0.218525,0.047382,0.129048,3.459806,0.277173,0.000000

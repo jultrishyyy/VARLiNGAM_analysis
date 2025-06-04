@@ -1,0 +1,56 @@
+--- METRICS AND THRESHOLDS ---
+
+Best Lags: 8
+Best Threshold (from F1-Max): 0.0972
+Best Threshold (from Accuracy-Max): 606.9582
+
+--- FINAL SCORES (after pruning with F1-Max threshold) ---
+
+Final F1 Score after pruning: 0.2985
+Final Accuracy after pruning: 0.8600
+Final AUROC after pruning: 0.6071
+--- EDGE ANALYSIS ---
+
+Number of edges in ground truth (labels): 14.0
+Number of correctly predicted edges (True Positives): 10
+Number of correct non-edges (True Negatives): 43
+Number of incorrectly predicted edges (False Positives): 43
+Number of correct edges not predicted (False Negatives): 4
+
+--- ORDER ANALYSIS---
+
+Predicted Causal Order: [3, 7, 1, 4, 0, 8, 5, 6, 9, 2]
+True Causal Order: [3, 4, 8, 0, 2, 5, 6, 7, 9, 1]
+Number of wrongly ordered cause-effect pairs: 9
+
+==================================================
+
+--- SUMMARY MATRIX ---
+(Represents the max causal effect across all lags after pruning)
+
+[[1 0 0 1 0 0 1 0 1 0]
+ [0 1 0 1 1 0 0 1 0 0]
+ [1 1 1 1 1 1 1 1 1 1]
+ [0 0 0 1 0 0 0 0 0 0]
+ [0 1 0 1 1 0 0 1 0 0]
+ [1 1 0 1 1 1 1 1 1 0]
+ [1 0 0 1 0 1 1 1 1 0]
+ [0 0 0 1 0 0 0 1 0 0]
+ [1 0 0 1 0 0 1 1 1 0]
+ [1 1 0 1 1 1 1 1 1 1]]
+
+==================================================
+
+--- EFFECT SUMMARY MATRIX ---
+(Represents the max causal effect across all lags before pruning)
+
+1.726642,0.009843,0.000063,0.732542,0.008048,0.017984,0.713663,0.073907,0.097244,0.007307
+0.025358,0.562669,0.001925,0.513365,0.201851,0.019715,0.023509,0.210469,0.020070,0.005748
+7.201253,15.987833,0.979704,606.958195,39.276397,4.812274,9.535068,94.717369,5.132292,3.948781
+0.002933,0.000512,0.000008,1.157697,0.001001,0.000584,0.001212,0.023180,0.000658,0.010462
+0.052618,0.148632,0.004273,1.404010,0.822474,0.018402,0.030183,0.438869,0.033114,0.014897
+0.825401,0.221876,0.000482,1.401321,0.270159,1.304904,1.331925,0.642754,0.392836,0.017631
+0.282999,0.053123,0.000430,3.005282,0.043105,0.117074,1.666462,0.177604,0.158476,0.033310
+0.004811,0.004207,0.000068,0.172317,0.008022,0.001870,0.008170,1.240756,0.003506,0.001298
+0.479769,0.014842,0.000147,0.436386,0.022395,0.037243,0.529847,0.113134,1.538565,0.011466
+0.338523,0.270685,0.001510,34.879225,0.277706,0.215839,0.829321,6.287738,3.164910,1.226965
