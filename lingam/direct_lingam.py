@@ -6,10 +6,9 @@ The LiNGAM Project: https://sites.google.com/view/sshimizu06/lingam
 import numpy as np
 from sklearn.preprocessing import scale
 from sklearn.utils import check_array
-import time
+
 from .base import _BaseLiNGAM
-from scipy.stats import spearmanr
-from sklearn.metrics.pairwise import rbf_kernel 
+
 
 class DirectLiNGAM(_BaseLiNGAM):
     """Implementation of DirectLiNGAM Algorithm [1]_ [2]_
@@ -53,70 +52,11 @@ class DirectLiNGAM(_BaseLiNGAM):
         super().__init__(random_state)
         self._Aknw = prior_knowledge
         self._apply_prior_knowledge_softly = apply_prior_knowledge_softly
-    
         self._measure = measure
 
         if self._Aknw is not None:
             self._Aknw = check_array(self._Aknw)
             self._Aknw = np.where(self._Aknw < 0, np.nan, self._Aknw)
-
-    # def fit(self, X):
-    #     """Fit the model to X.
-
-    #     Parameters
-    #     ----------
-    #     X : array-like, shape (n_samples, n_features)
-    #         Training data, where ``n_samples`` is the number of samples
-    #         and ``n_features`` is the number of features.
-
-    #     Returns
-    #     -------
-    #     self : object
-    #         Returns the instance itself.
-    #     """
-    #     # Check parameters
-    #     X = check_array(X)
-    #     n_features = X.shape[1]
-
-    #     # Check prior knowledge
-    #     if self._Aknw is not None:
-    #         if (n_features, n_features) != self._Aknw.shape:
-    #             raise ValueError(
-    #                 "The shape of prior knowledge must be (n_features, n_features)"
-    #             )
-    #         else:
-    #             # Extract all partial orders in prior knowledge matrix
-    #             if not self._apply_prior_knowledge_softly:
-    #                 self._partial_orders = self._extract_partial_orders(self._Aknw)
-
-    #     # Causal discovery
-    #     U = np.arange(n_features)
-    #     K = []
-    #     X_ = np.copy(X)
-    #     if self._measure == "kernel":
-    #         X_ = scale(X_)
-
-    #     for _ in range(n_features):
-    #         if self._measure == "kernel":
-    #             m = self._search_causal_order_kernel(X_, U)
-    #         elif self._measure == "pwling_fast":
-    #             m = self._search_causal_order_gpu(X_.astype(np.float64), U.astype(np.int32))
-    #         else:
-    #             m = self._search_causal_order(X_, U)
-    #         for i in U:
-    #             if i != m:
-    #                 X_[:, i] = self._residual(X_[:, i], X_[:, m])
-    #         K.append(m)
-    #         U = U[U != m]
-    #         # Update partial orders
-    #         if (self._Aknw is not None) and (not self._apply_prior_knowledge_softly):
-    #             self._partial_orders = self._partial_orders[
-    #                 self._partial_orders[:, 0] != m
-    #             ]
-
-    #     self._causal_order = K
-    #     return self._estimate_adjacency_matrix(X, prior_knowledge=self._Aknw)
-
 
     def fit(self, X):
         """Fit the model to X.
@@ -132,19 +72,12 @@ class DirectLiNGAM(_BaseLiNGAM):
         self : object
             Returns the instance itself.
         """
-        fit_start_time = time.time()
-        print("[DirectLiNGAM fit] Starting...")
-
-        # --- Initialization and Checks ---
-        init_start_time = time.time()
         # Check parameters
         X = check_array(X)
         n_features = X.shape[1]
-        print(f"[DirectLiNGAM fit] Input data shape: {X.shape}")
 
         # Check prior knowledge
         if self._Aknw is not None:
-            print("[DirectLiNGAM fit] Processing prior knowledge...")
             if (n_features, n_features) != self._Aknw.shape:
                 raise ValueError(
                     "The shape of prior knowledge must be (n_features, n_features)"
@@ -153,97 +86,34 @@ class DirectLiNGAM(_BaseLiNGAM):
                 # Extract all partial orders in prior knowledge matrix
                 if not self._apply_prior_knowledge_softly:
                     self._partial_orders = self._extract_partial_orders(self._Aknw)
-                    print("[DirectLiNGAM fit] Extracted partial orders from prior knowledge.")
-        init_end_time = time.time()
-        print(f"[DirectLiNGAM fit] Initialization and checks took: {init_end_time - init_start_time:.4f} seconds")
-        # --- End Initialization ---
 
-        # --- Causal Discovery Loop ---
-        causal_discovery_start_time = time.time()
-        print("[DirectLiNGAM fit] Starting causal discovery loop...")
+        # Causal discovery
         U = np.arange(n_features)
         K = []
         X_ = np.copy(X)
         if self._measure == "kernel":
-            print("[DirectLiNGAM fit] Scaling data for kernel measure.")
-            X_ = scale(X_) # Scale for kernel method
+            X_ = scale(X_)
 
-        total_search_time = 0
-        total_residual_time = 0
-
-        for k_idx in range(n_features):
-            iter_start_time = time.time()
-            print(f"[DirectLiNGAM fit] Causal discovery iteration {k_idx+1}/{n_features}...")
-
-            # --- Search for causal order ---
-            search_start_time = time.time()
+        for _ in range(n_features):
             if self._measure == "kernel":
-                # This step involves independence tests (e.g., mutual information)
-                print(f"[DirectLiNGAM fit]   Searching causal order (kernel)... Remaining vars: {len(U)}")
                 m = self._search_causal_order_kernel(X_, U)
             elif self._measure == "pwling_fast":
-                print(f"[DirectLiNGAM fit]   Searching causal order (pwling_fast/GPU)... Remaining vars: {len(U)}")
                 m = self._search_causal_order_gpu(X_.astype(np.float64), U.astype(np.int32))
-            elif self._measure == "spearman": 
-                print(f"[DirectLiNGAM fit]   Searching causal order (spearman)... Remaining vars: {len(U)}")
-                m = self._search_causal_order_spearman(X_, U) 
-            elif self._measure == "resid_ng":
-                print(f"[DirectLiNGAM fit]   Searching causal order (resid_ng)... Remaining vars: {len(U)}")
-                m = self._search_causal_order_resid_ng(X_, U)
             else:
-                print(f"[DirectLiNGAM fit]   Searching causal order (default)... Remaining vars: {len(U)}")
                 m = self._search_causal_order(X_, U)
-            search_end_time = time.time()
-            search_duration = search_end_time - search_start_time
-            total_search_time += search_duration
-            print(f"[DirectLiNGAM fit]   Found variable {m} in causal order. Search took: {search_duration:.4f} seconds.")
-            # --- End Search ---
-
-            # --- Calculate residuals ---
-            residual_start_time = time.time()
-            residual_calcs = 0
             for i in U:
                 if i != m:
                     X_[:, i] = self._residual(X_[:, i], X_[:, m])
-                    residual_calcs += 1
-            residual_end_time = time.time()
-            residual_duration = residual_end_time - residual_start_time
-            total_residual_time += residual_duration
-            print(f"[DirectLiNGAM fit]   Calculated {residual_calcs} residuals. Residual calculation took: {residual_duration:.4f} seconds.")
-            # --- End Residual Calculation ---
-
             K.append(m)
             U = U[U != m]
-            # Update partial orders if using prior knowledge
+            # Update partial orders
             if (self._Aknw is not None) and (not self._apply_prior_knowledge_softly):
-                self._partial_orders = self._partial_orders[self._partial_orders[:, 0] != m]
-
-            iter_end_time = time.time()
-            print(f"[DirectLiNGAM fit]   Iteration {k_idx+1} took: {iter_end_time - iter_start_time:.4f} seconds.")
-
-        causal_discovery_end_time = time.time()
-        print(f"[DirectLiNGAM fit] Causal discovery loop finished.")
-        print(f"[DirectLiNGAM fit]   Total time searching causal order: {total_search_time:.4f} seconds.")
-        print(f"[DirectLiNGAM fit]   Total time calculating residuals: {total_residual_time:.4f} seconds.")
-        print(f"[DirectLiNGAM fit] Total causal discovery loop time: {causal_discovery_end_time - causal_discovery_start_time:.4f} seconds")
-        # --- End Causal Discovery Loop ---
+                self._partial_orders = self._partial_orders[
+                    self._partial_orders[:, 0] != m
+                ]
 
         self._causal_order = K
-        print(f"[DirectLiNGAM fit] Determined causal order: {self._causal_order}")
-
-        # --- Estimate Adjacency Matrix ---
-        estimate_adj_start_time = time.time()
-        print("[DirectLiNGAM fit] Estimating final adjacency matrix...")
-        # This step typically involves regression based on the found order
-        final_self = self._estimate_adjacency_matrix(X, prior_knowledge=self._Aknw)
-        estimate_adj_end_time = time.time()
-        print(f"[DirectLiNGAM fit] Adjacency matrix estimation took: {estimate_adj_end_time - estimate_adj_start_time:.4f} seconds")
-        # --- End Estimate Adjacency Matrix ---
-
-        fit_end_time = time.time()
-        print(f"[DirectLiNGAM fit] Finished. Total time: {fit_end_time - fit_start_time:.4f} seconds")
-
-        return final_self # Return the result of _estimate_adjacency_matrix
+        return self._estimate_adjacency_matrix(X, prior_knowledge=self._Aknw)
 
     def _extract_partial_orders(self, pk):
         """Extract partial orders from prior knowledge."""
@@ -436,226 +306,3 @@ class DirectLiNGAM(_BaseLiNGAM):
             Tkernels.append(Tkernel)
 
         return Uc[np.argmin(Tkernels)]
-
-
-    def _search_causal_order_spearman(self, X, U):
-        """Search the causal ordering using Spearman rank correlation."""
-        Uc, Vj = self._search_candidate(U)
-        if len(Uc) == 1:
-            return Uc[0]
-
-        # Store the sum of squared Spearman correlations for each candidate
-        spearman_stat_list = []
-
-        for i in Uc: # Iterate through candidate exogenous variables
-            current_spearman_stat = 0
-            xi = X[:, i]
-
-            for j in U: # Iterate through all other remaining variables
-                if i == j:
-                    continue
-
-                xj = X[:, j]
-
-                # Calculate residual ri_j = xi regressed on xj
-                # Handle prior knowledge influence on residual calculation if necessary
-                # Based on _search_causal_order, this check might be needed:
-                if i in Vj and j in Uc:
-                    # If j is a candidate exogenous and i is known not to be caused by j,
-                    # don't regress, use original xi. But DirectLiNGAM aims for xi indep. of ri_j.
-                    # The original DirectLiNGAM logic focuses on finding xi independent of residuals.
-                    # So we should probably always calculate the residual here for the test.
-                    # Revisit this logic carefully based on the exact interpretation needed.
-                    # Let's stick to calculating the residual for the independence test:
-                    ri_j = self._residual(xi, xj)
-                else:
-                    ri_j = self._residual(xi, xj)
-
-                # Calculate Spearman correlation between xi and the residual ri_j
-                # Handle cases where residual variance might be zero (constant residual)
-                if np.std(ri_j) > 1e-10: # Check for non-zero variance
-                    corr, p_value = spearmanr(xi, ri_j)
-                    # Check if correlation is NaN (can happen with constant inputs)
-                    if not np.isnan(corr):
-                        current_spearman_stat += corr**2
-                # If residual has zero variance, its correlation is undefined/zero,
-                # contributing 0 to the sum, which seems reasonable.
-
-            spearman_stat_list.append(current_spearman_stat)
-
-        # Choose the variable 'i' that minimizes the sum of squared correlations
-        # This variable is considered the 'most independent' of its residuals
-        # in terms of monotonic correlation.
-        min_stat_index = np.argmin(spearman_stat_list)
-        return Uc[min_stat_index]
-    
-
-    def _center_kernel_matrix(self, K):
-        """Centers a kernel matrix K using the centering matrix H."""
-        n = K.shape[0]
-        H = np.eye(n) - np.ones((n, n)) / n
-        # K_centered = H @ K @ H # Original formula
-        # More efficient calculation:
-        mean_k_rows = np.mean(K, axis=1, keepdims=True)
-        mean_k_cols = np.mean(K, axis=0, keepdims=True)
-        mean_k_all = np.mean(K)
-        K_centered = K - mean_k_rows - mean_k_cols + mean_k_all
-        return K_centered
-
-    def _calculate_hsic(self, X, Y, kernel='rbf', sigma=1.0):
-        """Calculates a basic empirical HSIC statistic.
-
-        Note: This is a simple O(n^2) implementation. For speed, use
-            approximations like RFF or libraries like hyppo.
-        """
-        n_samples = X.shape[0]
-        if n_samples < 2:
-            return 0.0 # HSIC undefined for < 2 samples
-
-        # Ensure inputs are 2D
-        X = X.reshape(-1, 1) if X.ndim == 1 else X
-        Y = Y.reshape(-1, 1) if Y.ndim == 1 else Y
-
-        # --- Compute Kernel Matrices ---
-        if kernel == 'rbf':
-            # gamma = 1 / (2 * sigma**2) # sklearn's gamma definition
-            # K = rbf_kernel(X, gamma=gamma)
-            # L = rbf_kernel(Y, gamma=gamma)
-            # Simplified sigma usage (adjust based on kernel function needs)
-            K = rbf_kernel(X, X, gamma=1.0 / (2 * sigma**2)) # Common sigma usage
-            L = rbf_kernel(Y, Y, gamma=1.0 / (2 * sigma**2))
-        elif kernel == 'linear':
-            K = X @ X.T
-            L = Y @ Y.T
-        else:
-            raise ValueError(f"Unsupported kernel for HSIC: {kernel}")
-
-        # --- Center Kernel Matrices ---
-        Kc = self._center_kernel_matrix(K)
-        Lc = self._center_kernel_matrix(L)
-
-        # --- Calculate HSIC (unbiased estimator variant) ---
-        # Formula: HSIC = (1/(n-1)^2) * tr(Kc @ Lc) - slightly different from biased version
-        # Simpler biased estimator: HSIC = (1/n^2) * tr(Kc @ Lc)
-        # Let's use the simpler biased version here for clarity, scale doesn't matter for argmin
-        hsic_value = np.sum(Kc * Lc) # Equivalent to trace(Kc @ Lc.T) for element-wise product
-
-        # Normalize (optional, might help stability but not needed for argmin)
-        # hsic_value /= (n_samples**2)
-
-        # Ensure non-negative (due to potential floating point issues)
-        return max(0, hsic_value)
-    
-    def _search_causal_order_hsic(self, X, U):
-        """Search the causal ordering using HSIC."""
-        Uc, Vj = self._search_candidate(U)
-        if len(Uc) == 1:
-            return Uc[0]
-
-        # Store the sum of HSIC values for each candidate
-        hsic_stat_list = []
-
-        # Get HSIC parameters (example using defaults if not set in __init__)
-        hsic_kernel = getattr(self, '_hsic_kernel', 'rbf')
-        hsic_sigma = getattr(self, '_hsic_sigma', 1.0) # Adjust default sigma as needed
-
-        for i in Uc: # Iterate through candidate exogenous variables
-            current_hsic_stat = 0
-            xi = X[:, i]
-
-            for j in U: # Iterate through all other remaining variables
-                if i == j:
-                    continue
-
-                xj = X[:, j]
-                # Calculate residual ri_j = xi regressed on xj
-                # Handle prior knowledge (similar logic as in Spearman example)
-                ri_j = self._residual(xi, xj)
-
-                # Calculate HSIC between xi and the residual ri_j
-                # Handle cases where residual variance might be zero
-                if np.std(ri_j) > 1e-10: # Check for non-zero variance
-                    hsic_val = self._calculate_hsic(xi, ri_j, kernel=hsic_kernel, sigma=hsic_sigma)
-                    current_hsic_stat += hsic_val
-                # If residual is constant, HSIC should be ~0, contributing 0.
-
-            hsic_stat_list.append(current_hsic_stat)
-
-        # Choose the variable 'i' that minimizes the sum of HSIC stats
-        min_stat_index = np.argmin(hsic_stat_list)
-        return Uc[min_stat_index]
-    
-# --- NEW SKEWNESS METHOD ---
-    def _standardize_array(self, arr):
-        """Standardizes a 1D array (mean 0, std 1). Returns original if std is near zero."""
-        mean = np.mean(arr)
-        std = np.std(arr)
-        if std < 1e-12:
-            return arr - mean # Return mean-centered if std is zero
-        return (arr - mean) / std
-    
-    def _abs_skewness(self, arr_std):
-        """Calculates absolute skewness of a pre-standardized 1D array."""
-        if arr_std.shape[0] < 3: return 0.0 # Skewness undefined or unstable for very few samples
-        # Ensure arr_std is indeed standardized to avoid issues if it's constant coming in
-        if np.std(arr_std) < 1e-12: return 0.0
-        return np.abs(np.mean(arr_std**3))
-        
-    # --- NEW RESIDUAL NON-GAUSSIANITY METHOD ---
-    def _search_causal_order_resid_ng(self, X_current, U_indices):
-        """Search causal ordering by maximizing non-Gaussianity of outgoing residuals."""
-        Uc_indices, _ = self._search_candidate(U_indices)
-        if not Uc_indices.size: Uc_indices = U_indices # Fallback
-        if Uc_indices.size == 0: return None # No variables left to order
-        if Uc_indices.size == 1: return Uc_indices[0] # Only one candidate
-
-        candidate_scores = [] # Stores (total_ng_score_for_m, m_idx)
-
-        for m_cand_idx in Uc_indices: # Candidate exogenous variable 'm'
-            total_ng_score_for_m = 0.0
-            
-            xm_std_arr = self._standardize_array(X_current[:, m_cand_idx])
-            if np.std(xm_std_arr) < 1e-12: # If candidate 'm' is constant
-                candidate_scores.append((-np.inf, m_cand_idx)) # Give a very bad score
-                continue
-
-            num_valid_residuals = 0
-            for j_other_idx in U_indices:
-                if m_cand_idx == j_other_idx:
-                    continue
-
-                xj_std_arr = self._standardize_array(X_current[:, j_other_idx])
-                if np.std(xj_std_arr) < 1e-12: # If other variable is constant
-                    continue
-                
-                # Calculate R_{j <- m} (residual of Xj_std on Xm_std)
-                r_j_from_m_raw = self._residual(xj_std_arr, xm_std_arr)
-                r_j_from_m_std = self._standardize_array(r_j_from_m_raw)
-                
-                if np.std(r_j_from_m_std) < 1e-12: # If residual is constant
-                    continue
-                
-                # Using absolute skewness as the non-Gaussianity measure
-                ng_score_of_residual = self._abs_skewness(r_j_from_m_std)
-                total_ng_score_for_m += ng_score_of_residual
-                num_valid_residuals +=1
-            
-            if num_valid_residuals > 0 :
-                 average_ng_score = total_ng_score_for_m / num_valid_residuals
-                 candidate_scores.append((average_ng_score, m_cand_idx))
-            else: # No valid residuals found for this candidate (e.g. all other vars were constant)
-                 candidate_scores.append((-np.inf, m_cand_idx))
-
-
-        if not candidate_scores: # Should not happen if Uc_indices was not empty
-            if Uc_indices.size > 0 : return Uc_indices[0]
-            return None
-
-        # Select the candidate m that MAXIMIZES the total_ng_score_for_m
-        best_score, best_m_idx = -np.inf, None
-        if candidate_scores: # Ensure candidate_scores is not empty
-            # Sort by score descending, then by index ascending as a tie-breaker
-            candidate_scores.sort(key=lambda x: (-x[0], x[1]))
-            best_m_idx = candidate_scores[0][1]
-            
-        return best_m_idx

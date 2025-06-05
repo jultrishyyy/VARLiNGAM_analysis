@@ -2,6 +2,13 @@ import pandas as pd
 import numpy as np
 import os
 
+# Define file paths
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+DATA_PATH = os.path.join(ROOT_DIR, "data", "Flood")
+input_filename = DATA_PATH + "/rivers_ts_flood.csv" # Make sure this path is correct
+output_filename = DATA_PATH + "/rivers_ts_flood_preprocessed.csv"
+
+
 # --- Helper functions (Copied from previous context with robustness improvements) ---
 def remove_trailing_nans(sample_prep):
     """
@@ -114,79 +121,73 @@ def preprocess_data(
     
     return sample_data
 
-# --- Main script ---
 
-# 1. Define file paths
-input_file_path = "../causalriver/rivers_ts_bavaria.csv" # Make sure this path is correct
-output_file_path = "../causalriver/rivers_ts_bavaria_preprocessed.csv"
+if __name__ == "__main__":
 
-# Check if input file exists
-if not os.path.exists(input_file_path):
-    print(f"Error: Input file not found at {input_file_path}")
-    print("Please ensure the file exists in the specified 'causalriver' subdirectory or update the path.")
-else:
-    print(f"Reading data from: {input_file_path}")
-    # Load data into pandas DataFrame
-    try:
-        df = pd.read_csv(input_file_path, index_col='datetime')
-        df.index = pd.to_datetime(df.index) # Ensure the index is a DatetimeIndex
-        
-        print("\nOriginal Data Head (first 5 rows):")
-        print(df.head())
-        print(f"\nOriginal Data Shape: {df.shape}")
-        
-        # Count missing values per column before preprocessing for non-empty columns
-        missing_before = df.isnull().sum()
-        missing_before = missing_before[missing_before > 0]
-        if not missing_before.empty:
-          print(f"\nMissing values per column before preprocessing (showing columns with NaNs):\n{missing_before}")
-        else:
-          print("\nNo missing values found in the original dataset.")
-
-
-        # 2. Define preprocessing configuration
-        # These are example parameters; you might need to adjust them.
-        preprocess_config = {
-            'resolution': None,  # Resample to 1-hour intervals by taking the mean.
-            'resolution': '2H',  # Resample to 1-hour intervals by taking the mean.
-            # 'interpolate': True,   # Interpolate missing values using linear interpolation.
-            'subset_year': False,  # No subsetting by year for this example.
-            'subset_month': False, # No subsetting by month.
-            'subsample': 1,        # No further subsampling of rows.
-            'normalize': False,    # Set to True to normalize data (0-1 range).
-            'remove_trailing_nans_early': True # Clean NaNs at start/end before major operations.
-        }
-
-        print(f"\n--- Preprocessing with config: {preprocess_config} ---")
-
-        # 3. Apply preprocessing
-        df_preprocessed = preprocess_data(df, **preprocess_config)
-
-        print("\nPreprocessed Data Head (first 5 rows):")
-        print(df_preprocessed.head())
-        print(f"\nPreprocessed Data Shape: {df_preprocessed.shape}")
-        
-        missing_after = df_preprocessed.isnull().sum()
-        missing_after = missing_after[missing_after > 0]
-        if not missing_after.empty:
-            print(f"\nMissing values per column after preprocessing (showing columns with NaNs):\n{missing_after}")
-        else:
-            print("\nNo missing values found after preprocessing.")
-
-        # df_preprocessed = df_preprocessed.iloc[:, 1:]
-        # print(df_preprocessed.head())
-        # print(f"\nPreprocessed Data Shape: {df_preprocessed.shape}")
-        
-        # 4. Save the preprocessed data
-        # Ensure the output directory exists if it's part of the path (not needed for "./")
-        output_dir = os.path.dirname(output_file_path)
-        if output_dir and not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+    # Check if input file exists
+    if not os.path.exists(input_filename):
+        print(f"Error: Input file not found at {input_filename}")
+        print("Please ensure the file exists in the specified 'causalriver' subdirectory or update the path.")
+    else:
+        print(f"Reading data from: {input_filename}")
+        # Load data into pandas DataFrame
+        try:
+            df = pd.read_csv(input_filename, index_col='datetime')
+            df.index = pd.to_datetime(df.index) # Ensure the index is a DatetimeIndex
             
-        df_preprocessed.to_csv(output_file_path)
-        print(f"\nPreprocessed data saved to: {output_file_path}")
+            print("\nOriginal Data Head (first 5 rows):")
+            print(df.head())
+            print(f"\nOriginal Data Shape: {df.shape}")
+            
+            # Count missing values per column before preprocessing for non-empty columns
+            missing_before = df.isnull().sum()
+            missing_before = missing_before[missing_before > 0]
+            if not missing_before.empty:
+                print(f"\nMissing values per column before preprocessing (showing columns with NaNs):\n{missing_before}")
+            else:
+                print("\nNo missing values found in the original dataset.")
 
-    except FileNotFoundError:
-        print(f"Error: Input file not found at {input_file_path}")
-    except Exception as e:
-        print(f"An error occurred during processing: {e}")
+
+            # Define preprocessing configuration
+            # These are example parameters; you might need to adjust them.
+            preprocess_config = {
+                'resolution': None,  # Resample to 1-hour intervals by taking the mean.
+                # 'resolution': '2H',  # Resample to 1-hour intervals by taking the mean.
+                # 'interpolate': True,   # Interpolate missing values using linear interpolation.
+                'subset_year': False,  # No subsetting by year for this example.
+                'subset_month': False, # No subsetting by month.
+                'subsample': 1,        # No further subsampling of rows.
+                'normalize': False,    # Set to True to normalize data (0-1 range).
+                'remove_trailing_nans_early': True # Clean NaNs at start/end before major operations.
+            }
+
+            print(f"\n--- Preprocessing with config: {preprocess_config} ---")
+
+            # Apply preprocessing
+            df_preprocessed = preprocess_data(df, **preprocess_config)
+
+            print("\nPreprocessed Data Head (first 5 rows):")
+            print(df_preprocessed.head())
+            print(f"\nPreprocessed Data Shape: {df_preprocessed.shape}")
+            
+            missing_after = df_preprocessed.isnull().sum()
+            missing_after = missing_after[missing_after > 0]
+            if not missing_after.empty:
+                print(f"\nMissing values per column after preprocessing (showing columns with NaNs):\n{missing_after}")
+            else:
+                print("\nNo missing values found after preprocessing.")
+
+            
+            # Save the preprocessed data
+            # Ensure the output directory exists if it's part of the path (not needed for "./")
+            output_dir = os.path.dirname(output_filename)
+            if output_dir and not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+                
+            df_preprocessed.to_csv(output_filename)
+            print(f"\nPreprocessed data saved to: {output_filename}")
+
+        except FileNotFoundError:
+            print(f"Error: Input file not found at {input_filename}")
+        except Exception as e:
+            print(f"An error occurred during processing: {e}")

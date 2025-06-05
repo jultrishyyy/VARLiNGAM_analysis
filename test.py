@@ -3,14 +3,11 @@ import numpy as np
 import pandas as pd
 import graphviz
 import lingam
-from lingam.utils import make_dot, print_causal_directions, print_dagc
-
 import argparse
 import os
-import sys
 
 
-from utils.helper import convert_Btaus_to_summary_matrix
+from helper.helper_methods import convert_Btaus_to_summary_matrix
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(current_dir, "data")

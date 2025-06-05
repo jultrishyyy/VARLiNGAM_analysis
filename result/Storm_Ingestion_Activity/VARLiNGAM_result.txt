@@ -1,0 +1,52 @@
+--- METRICS ---
+
+Number of edges in ground truth (label summary matrix): 9
+Number of correctly predicted edges (True Positives): 7
+Number of correct non-edges (True Negatives): 14
+Number of incorrectly predicted edges (False Positives): 41
+Number of correct edges not predicted (False Negatives): 2
+Precision: 0.1458
+Recall: 0.7778
+F1 Score: 0.2456
+
+--- ORDER ANALYSIS---
+
+Predicted Causal Order: [7, 0, 2, 5, 6, 1, 4, 3]
+Number of wrongly ordered cause-effect pairs: 5
+5 Wrongly ordered pairs in ground truth causal matrix:
+    - Wrongly ordered: 4 -> 2 
+    - Wrongly ordered: 3 -> 4 
+    - Wrongly ordered: 1 -> 6 
+    - Wrongly ordered: 1 -> 7 
+    - Wrongly ordered: 6 -> 7 
+
+
+==================================================
+
+--- ESTIMATED SUMMARY MATRIX ---
+(Represents the estimated causal effect across all lags after pruning)
+
+1,1,1,1,1,1,1,1
+1,1,0,0,0,0,0,1
+0,1,1,0,0,0,0,1
+1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1
+0,1,0,0,0,0,0,1
+
+
+
+==================================================
+
+--- CONTINUOUS SUMMARY MATRIX ---
+(Represents the max estimated causal effect across all lags before pruning)
+
+0.521328,0.896073,0.224536,0.100078,0.014124,0.034967,0.299324,1.417573
+0.010975,0.862861,0.006345,0.003532,0.000543,0.002818,0.000313,0.103790
+0.000770,0.057488,0.896184,0.002387,0.007913,0.005983,0.005938,0.015575
+0.066270,0.367827,0.029038,0.737900,0.225772,0.222698,0.078261,0.787651
+0.152918,0.281707,0.309392,0.045258,0.828254,0.493262,0.127617,1.555245
+0.658622,0.420947,1.181487,0.063071,0.040245,0.771185,0.057437,6.648936
+0.534261,0.303643,0.313345,0.047474,0.040198,0.092608,0.536368,1.518986
+0.002223,0.016569,0.007393,0.000274,0.000332,0.001264,0.001230,0.638279

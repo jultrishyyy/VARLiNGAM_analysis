@@ -4,7 +4,7 @@ The LiNGAM Project: https://sites.google.com/view/sshimizu06/lingam
 """
 import itertools
 import warnings
-import time
+
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.utils import check_array, resample
@@ -64,7 +64,6 @@ class VARLiNGAM:
         self._lingam_model = lingam_model
         self._random_state = random_state
 
-
     def fit(self, X):
         """Fit the model to X.
 
@@ -79,83 +78,39 @@ class VARLiNGAM:
         self : object
             Returns the instance itself.
         """
-        fit_start_time = time.time()
-        print("[VarLiNGAM fit] Starting...")
-
         self._causal_order = None
         self._adjacency_matrices = None
 
         X = check_array(X)
 
-        # Initialize LiNGAM model if needed
-        init_lingam_start = time.time()
         lingam_model = self._lingam_model
         if lingam_model is None:
-            # NOTE: Replace DirectLiNGAM() with the actual class if different
-            from lingam import DirectLiNGAM # Assuming DirectLiNGAM is in lingam package
             lingam_model = DirectLiNGAM()
-            # lingam_model = DirectLiNGAM(measure="resid_ng")
-            print("[VarLiNGAM fit] Initialized default DirectLiNGAM.")
-        elif not isinstance(lingam_model, _BaseLiNGAM): # Assuming _BaseLiNGAM is defined
+        elif not isinstance(lingam_model, _BaseLiNGAM):
             raise ValueError("lingam_model must be a subclass of _BaseLiNGAM")
-        init_lingam_end = time.time()
-        print(f"[VarLiNGAM fit] LiNGAM model setup took: {init_lingam_end - init_lingam_start:.4f} seconds")
 
         M_taus = self._ar_coefs
 
-        # --- Step 1: Estimate VAR coefficients and residuals ---
-        var_fit_start = time.time()
         if M_taus is None:
-            print("[VarLiNGAM fit] Estimating VAR coefficients...")
             M_taus, lags, residuals = self._estimate_var_coefs(X)
-            print(f"[VarLiNGAM fit] VAR estimation complete. Lags={lags}")
         else:
-            print("[VarLiNGAM fit] Calculating residuals from provided VAR coefficients...")
             lags = M_taus.shape[0]
             residuals = self._calc_residuals(X, M_taus, lags)
-            print("[VarLiNGAM fit] Residual calculation complete.")
-        var_fit_end = time.time()
-        print(f"[VarLiNGAM fit] VAR estimation/Residual calculation took: {var_fit_end - var_fit_start:.4f} seconds")
-        # --- End Step 1 ---
 
-        # --- Step 2: Fit LiNGAM on residuals ---
-        lingam_fit_start = time.time()
-        print("[VarLiNGAM fit] Fitting LiNGAM model on residuals...")
         model = lingam_model
-        model.fit(residuals) # This will call the DirectLiNGAM fit method (or other variant)
-        lingam_fit_end = time.time()
-        print(f"[VarLiNGAM fit] LiNGAM fitting on residuals took: {lingam_fit_end - lingam_fit_start:.4f} seconds")
-        # --- End Step 2 ---
+        model.fit(residuals)
 
-        # --- Step 3: Calculate B_taus (lagged adjacency matrices) ---
-        calc_b_start = time.time()
-        print("[VarLiNGAM fit] Calculating lagged adjacency matrices (B_taus)...")
         B_taus = self._calc_b(X, model.adjacency_matrix_, M_taus)
-        calc_b_end = time.time()
-        print(f"[VarLiNGAM fit] B_taus calculation took: {calc_b_end - calc_b_start:.4f} seconds")
-        # --- End Step 3 ---
 
-        # --- Step 4: Pruning (Optional) ---
-        pruning_start = time.time()
         if self._prune:
-            print("[VarLiNGAM fit] Pruning adjacency matrices...")
             B_taus = self._pruning(X, B_taus, model.causal_order_)
-            pruning_end = time.time()
-            print(f"[VarLiNGAM fit] Pruning took: {pruning_end - pruning_start:.4f} seconds")
-        else:
-            pruning_end = pruning_start # No time taken if not pruning
-            print("[VarLiNGAM fit] Pruning step skipped.")
-        # --- End Step 4 ---
 
-        # Store results
         self._ar_coefs = M_taus
         self._lags = lags
         self._residuals = residuals
+
         self._causal_order = model.causal_order_
         self._adjacency_matrices = B_taus
-
-        fit_end_time = time.time()
-        print(f"[VarLiNGAM fit] Finished. Total time: {fit_end_time - fit_start_time:.4f} seconds")
 
         return self
 
@@ -445,7 +400,6 @@ class VARLiNGAM:
                 ]
 
         return B_taus
-
 
     @property
     def causal_order_(self):
