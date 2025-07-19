@@ -54,6 +54,7 @@ def convert_Btaus_to_summary_matrix(B_taus):
     return summary_matrix
 
 
+
 def plot_summary_causal_graph(B_taus, filename="summary_causal_graph.png"):
     """
     Plots and saves a summary causal graph from a 3D array of Btau matrices.
@@ -130,11 +131,11 @@ def plot_summary_causal_graph(B_taus, filename="summary_causal_graph.png"):
         edge_width = 1.0
     else:
         if n_vars <= 5:
-            k_val = 0.9
+            k_val = 8
         elif n_vars <= 10:
-            k_val = 0.6
+            k_val = 6
         else:
-            k_val = 0.5
+            k_val = 4
         pos = nx.spring_layout(G, k=k_val, iterations=100, seed=42)
         node_size = 3000
         font_size = 35
